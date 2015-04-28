@@ -7,7 +7,7 @@ import java.util.Comparator;
 
 
 /**
- *  TheFiboMinPQ class represents a priority queue of generic keys.
+ *  The FibonacciMinPQ class represents a priority queue of generic keys.
  *  It supports the usual insert and delete-the-minimum operations, 
  *  along with the merging of two heaps together.
  *  It also supports methods for peeking at the minimum key,
@@ -22,57 +22,62 @@ import java.util.Comparator;
  *
  *  @author Tristan Claverie
  */
-public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
-	private Node head;					//head of the circular root list
+public class FibonacciMinPQ<Key> implements Iterable<Key> {
+	private Node head;					//Head of the circular root list
 	private Node min;					//Minimum Node of the root list
 	private int size;					//Number of keys in the heap
-	private final Comparator<Key> COMP;	//A Comparator over the keys
+	private final Comparator<Key> comp;	//Comparator over the keys
 	private HashMap<Integer, Node> table = new HashMap<>(); //Used for the consolidate operation
 	
 	//Represents a Node of a tree
 	private class Node {
-		Key key;			//Key of this Node
-		int order;			//Order of the tree rooted by this Node
-		Node prev, next;	//Siblings of this Node
-		Node child;			//Child of this Node
+		Key key;						//Key of this Node
+		int order;						//Order of the tree rooted by this Node
+		Node prev, next;				//Siblings of this Node
+		Node child;						//Child of this Node
 	}
 	
 	/**
 	 * Initializes an empty priority queue
-	 * @param Comp a Comparator over the Keys
+	 * Runs in O(1)
+	 * @param C a Comparator over the Keys
 	 */
-	public FiboMinPQ(Comparator<Key> Comp) {
-		COMP = Comp;
+	public FibonacciMinPQ(Comparator<Key> C) {
+		comp = C;
 	}
 	
 	/**
      * Initializes an empty priority queue
+     * Runs in O(1)
      */
-	public FiboMinPQ() {
-		COMP = new MyComparator();
+	public FibonacciMinPQ() {
+		comp = new MyComparator();
 	}
 	
 	/**
 	 * Initializes a priority queue with given keys
+	 * Runs in O(n)
 	 * @param a an array of keys
 	 */
-	public FiboMinPQ(Key[] a) {
-		COMP = new MyComparator();
+	public FibonacciMinPQ(Key[] a) {
+		comp = new MyComparator();
 		for (Key k : a) insert(k);
 	}
 	
 	/**
 	 * Initializes a priority queue with given keys
-	 * @param Comp a comparator over the keys
+	 * Runs in O(n)
+	 * @param C a comparator over the keys
 	 * @param a an array of keys
 	 */
-	public FiboMinPQ(Comparator<Key> Comp, Key[] a) {
-		COMP = Comp;
+	public FibonacciMinPQ(Comparator<Key> C, Key[] a) {
+		comp = C;
 		for (Key k : a) insert(k);
 	}
 
 	/**
 	 * Whether the priority queue is empty
+	 * Runs in O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	public boolean isEmpty() {
@@ -80,7 +85,8 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 	}
 
 	/**
-	 * Number of elements currently on the priority queue, takes constant time
+	 * Number of elements currently on the priority queue
+	 * Runs in O(1)
 	 * @return the number of elements on the priority queue
 	 */
 	public int size() {
@@ -89,6 +95,7 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 
 	/**
 	 * Insert a key in the queue
+	 * Runs in O(1)
 	 * @param key a Key
 	 */
 	public void insert(Key key) {
@@ -102,6 +109,7 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 
 	/**
 	 * Get the minimum key currently in the queue
+	 * Runs in O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
@@ -111,7 +119,8 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 	}
 
 	/**
-	 * Delete the minimum key
+	 * Deletes the minimum key
+	 * Runs in O(log(n)) (amortized)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key
 	 */
@@ -133,25 +142,27 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 	
 	/**
 	 * Merge two heaps together
+	 * This operation is destructive
+	 * Runs in O(1)
 	 * @param that a Fibonacci heap
 	 * @return the union of the two heaps
 	 */
-	public FiboMinPQ<Key> union(FiboMinPQ<Key> that) {
-		FiboMinPQ<Key> pq = new FiboMinPQ<>(COMP);
-		pq.head = meld(head, that.head);
-		pq.min = (greater(this.min.key, that.min.key)) ? that.min : this.min;
-		pq.size = this.size+that.size;
-		return pq;
+	public FibonacciMinPQ<Key> union(FibonacciMinPQ<Key> that) {
+		this.head = meld(head, that.head);
+		this.min = (greater(this.min.key, that.min.key)) ? that.min : this.min;
+		this.size = this.size+that.size;
+		return this;
 	}
 	
 	/*************************************
 	 * General helper functions
 	 ************************************/
 	
+	//Compares two keys
 	private boolean greater(Key n, Key m) {
 		if (n == null) return false;
 		if (m == null) return true;
-		return COMP.compare(n,m) > 0;
+		return comp.compare(n,m) > 0;
 	}
 	
 	//Assuming root1 holds a greater key than root2, root2 becomes the new root
@@ -164,6 +175,7 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 	 * Function for consolidating all trees in the root list
 	 ************************************/
 	
+	//Coalesce the roots, thus reshapes the tree
 	private void consolidate() {
 		table.clear();
 		Node x = head;
@@ -190,7 +202,7 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 		head = null;
 		for (Node n : table.values()) {
 			if (n != null) {
-				if (min.key.compareTo(n.key) >= 0) min = n;
+				min = greater(min.key, n.key) ? n : min;
 				head = insert(n, head);
 			}
 		}
@@ -200,7 +212,7 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 	 * General helper functions for manipulating circular lists
 	 ************************************/
 	
-	//insert a Node in a circular list containing head, returns a new head
+	//Inserts a Node in a circular list containing head, returns a new head
 	private Node insert(Node x, Node head) {
 		if (head == null) {
 			x.prev = x;
@@ -250,6 +262,9 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 	/**
 	 * Get an Iterator over the Keys in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
+	 * iterator() : Runs in O(n)
+	 * next() : Runs in O(log(n)) (amortized)
+	 * hasNext() : Runs in O(1)
 	 * @return an Iterator over the Keys in the priority queue in ascending order
 	 */
 	
@@ -258,21 +273,21 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 	}
 	
 	private class MyIterator implements Iterator<Key> {
-		private FiboMinPQ<Key> copy;
+		private FibonacciMinPQ<Key> copy;
 		
 		
 		//Constructor takes linear time
 		public MyIterator() {
-			copy = new FiboMinPQ<>();
-			process(head);
+			copy = new FibonacciMinPQ<>(comp);
+			insertAll(head);
 		}
 		
-		private void process(Node head) {
+		private void insertAll(Node head) {
 			if (head == null) return;
 			Node x = head;
 			do {
 				copy.insert(x.key);
-				process(x.child);
+				insertAll(x.child);
 				x = x.next;
 			} while (x != head);
 		}
@@ -300,7 +315,37 @@ public class FiboMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
 	private class MyComparator implements Comparator<Key> {
 		@Override
 		public int compare(Key key1, Key key2) {
-			return key1.compareTo(key2);
+			return ((Comparable<Key>) key1).compareTo(key2);
 		}
 	}
+	
+	public static void main(String[] args) {
+        // insert a bunch of strings
+        String[] strings = { "it", "was", "the", "best", "of", "times", "it", "was", "the", "worst" };
+
+        MultiwayMinPQ<String> pq = new MultiwayMinPQ<>(4);
+        for (int i = 0; i < strings.length; i++) {
+            pq.insert(strings[i]);
+        }
+
+        // delete and print each key
+        while (!pq.isEmpty()) {
+            System.out.println(pq.delMin());
+        }
+        System.out.println();
+
+        // reinsert the same strings
+        for (int i = 0; i < strings.length; i++) {
+            pq.insert(strings[i]);
+        }
+
+        // print each key using the iterator
+        for (String s : pq) {
+            System.out.println(s);
+        }
+        while (!pq.isEmpty()) {
+            pq.delMin();
+        }
+
+    }
 }

@@ -1,10 +1,11 @@
 package tools;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- *  The IndexDaryMinPQ class represents an indexed priority queue of generic keys.
+ *  The IndexMultiwayMinPQ class represents an indexed priority queue of generic keys.
  *  It supports the usual insert and delete-the-minimum operations,
  *  along with delete and change-the-key methods. 
  *  In order to let the client refer to keys on the priority queue,
@@ -14,7 +15,7 @@ import java.util.NoSuchElementException;
  *  testing if the priority queue is empty, and iterating through
  *  the keys.
  *  
- *  This implementation uses a d-ary heap along with an array to associate
+ *  This implementation uses a multiway heap along with an array to associate
  *  keys with integers in the given range.
  *  For simplified notations, logarithm in base d will be referred as log-d
  *  The delete-the-minimum, delete, change-key and increase-key operations
@@ -26,142 +27,178 @@ import java.util.NoSuchElementException;
  *  @author Tristan Claverie
  */
 
-public class IndexDaryMinPQ<Key extends Comparable<Key>> implements Iterable<Integer> {
-	private final int D;	//Dimension of the heap
-	private int N;			//Number of keys currently in the queue
-	private int NMAX;		//Maximum number of items in the queue
-	private int[] pq;		//D-ary heap
-	private int[] qp;		//Inverse of pq : qp[pq[i]] = pq[qp[i]] = i
-	private Key[] keys;		//keys[i] = priority of i
+public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
+	private final int d;				//Dimension of the heap
+	private int n;						//Number of keys currently in the queue
+	private int nmax;					//Maximum number of items in the queue
+	private int[] pq;					//Multiway heap
+	private int[] qp;					//Inverse of pq : qp[pq[i]] = pq[qp[i]] = i
+	private Key[] keys;					//keys[i] = priority of i
+	private final Comparator<Key> comp; //Comparator over the keys
 	
 	
 	/**
-     * Initializes an empty indexed priority queue with indices between 0 and N-1.
+     * Initializes an empty indexed priority queue with indices between 0 and N-1
+     * Runs in O(n)
      * @param N number of keys in the priority queue, index from 0 to N-1
      * @param D dimension of the heap
      * @throws java.lang.IllegalArgumentException if N < 0
      * @throws java.lang.IllegalArgumentException if D < 2
      */
-	public IndexDaryMinPQ(int N, int D) {
+	public IndexMultiwayMinPQ(int N, int D) {
 		if (N < 0) throw new IllegalArgumentException("Maximum number of elements cannot be negative");
 		if (D < 2) throw new IllegalArgumentException("Dimension should be 2 or over");
-		this.D = D;
-		NMAX = N;
-		pq = new int[NMAX];
-		qp = new int[NMAX];
-		keys = (Key[]) new Comparable[NMAX];
-		for (int i = 0 ; i < NMAX ; qp[i++] = -1);
+		this.d = D;
+		nmax = N;
+		pq = new int[nmax+D];
+		qp = new int[nmax+D];
+		keys = (Key[]) new Comparable[nmax+D];
+		for (int i = 0; i < nmax+D; qp[i++] = -1);
+		comp = new MyComparator();
+	}
+	
+	/**
+     * Initializes an empty indexed priority queue with indices between 0 and N-1
+     * Runs in O(n)
+     * @param N number of keys in the priority queue, index from 0 to N-1
+     * @param D dimension of the heap
+     * @param C a Comparator over the keys
+     * @throws java.lang.IllegalArgumentException if N < 0
+     * @throws java.lang.IllegalArgumentException if D < 2
+     */
+	public IndexMultiwayMinPQ(Comparator<Key> C, int N, int D) {
+		if (N < 0) throw new IllegalArgumentException("Maximum number of elements cannot be negative");
+		if (D < 2) throw new IllegalArgumentException("Dimension should be 2 or over");
+		this.d = D;
+		nmax = N;
+		pq = new int[nmax+D];
+		qp = new int[nmax+D];
+		keys = (Key[]) new Comparable[nmax+D];
+		for (int i = 0; i < nmax+D; qp[i++] = -1);
+		comp = C;
 	}
 
 	/**
 	 * Whether the priority queue is empty
+	 * Runs in O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	public boolean isEmpty() {
-		return N == 0;
+		return n == 0;
 	}
 
 	/**
 	 * Does the priority queue contains the index i ?
+	 * Runs in O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @return true if i is on the priority queue, false if not
 	 */
 	public boolean contains(int i) {
-		if (i < 0 ||i >= NMAX) throw new IndexOutOfBoundsException();
-		return qp[i] != -1;
+		if (i < 0 ||i >= nmax) throw new IndexOutOfBoundsException();
+		return qp[i+d] != -1;
 	}
 
 	/**
 	 * Number of elements currently on the priority queue
+	 * Runs in O(1)
 	 * @return the number of elements on the priority queue
 	 */
 	public int size() {
-		return N;
+		return n;
 	}
 
 	/**
 	 * Associates a key with an index
+	 * Runs in O(log-d(n))
 	 * @param i an index
 	 * @param key a Key associated with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.IllegalArgumentException if the index is already in the queue
 	 */
 	public void insert(int i, Key key) {
-		if (i < 0 || i >= NMAX) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= nmax) throw new IndexOutOfBoundsException();
 		if (contains(i)) throw new IllegalArgumentException("Index already there");
-		keys[i] = key;
-		pq[N] = i;
-		qp[i] = N;
-		swim(N++);
+		keys[i+d] = key;
+		pq[n+d] = i;
+		qp[i+d] = n;
+		swim(n++);
 	}
 
 	/**
 	 * Get the index associated with the minimum key
+	 * Runs in O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
 	public int minIndex() {
 		if (isEmpty()) throw new NoSuchElementException("Priority queue is empty");
-		return pq[0];
+		return pq[d];
 	}
 
 	/**
 	 * Get the minimum key currently in the queue
+	 * Runs in O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
 	public Key minKey() {
 		if (isEmpty()) throw new NoSuchElementException("Priority queue is empty");
-		return keys[0];
+		return keys[pq[d]+d];
 	}
 
 	/**
-	 * Delete the minimum key
+	 * Deletes the minimum key
+	 * Runs in O(d*log-d(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
 	public int delMin() {
 		if (isEmpty()) throw new NoSuchElementException("Priority queue is empty");
-		int min = pq[0];
-		exch(0, --N);
+		int min = pq[d];
+		exch(0, --n);
 		sink(0);
-		qp[min] = -1;
-		keys[pq[N]] = null;
-		pq[N] = -1;
+		qp[min+d] = -1;
+		keys[pq[n+d]+d] = null;
+		pq[n+d] = -1;
 		return min;
 	}
 
 	/**
 	 * Get the key associated with index i
+	 * Runs in O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.IllegalArgumentException if the index is not in the queue
 	 * @return the key associated with index i
 	 */
 	public Key keyOf(int i) {
-		if (i < 0 || i >= NMAX) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= nmax) throw new IndexOutOfBoundsException();
 		if (! contains(i)) throw new NoSuchElementException("Specified index is not in the queue");
-		return keys[i];
+		return keys[i+d];
 	}
 
 	/**
 	 * Changes the key associated with index i to the given key
+	 * If the given key is greater, runs in O(d*log-d(n))
+	 * If the given key is lower,   runs in O(log-d(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.IllegalArgumentException if the index has no key associated with
 	 */
 	public void changeKey(int i, Key key) {
-		if (i < 0 || i >=NMAX) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= nmax) throw new IndexOutOfBoundsException();
 		if (! contains(i)) throw new NoSuchElementException("Specified index is not in the queue");
-		keys[i] = key;
-		swim(qp[i]);
-		sink(qp[i]);
+		Key tmp = keys[i+d];
+		keys[i+d] = key;
+		if (comp.compare(key, tmp) <= 0) { swim(qp[i+d]);}
+		else 							 { sink(qp[i+d]);}
 	}
 
 	/**
 	 * Decreases the key associated with index i to the given key
+	 * Runs in O(log-d(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -169,15 +206,16 @@ public class IndexDaryMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 * @throws java.util.IllegalArgumentException if the given key is greater than the current key
 	 */
 	public void decreaseKey(int i, Key key) {
-		if (i < 0 || i >=NMAX) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >=nmax) throw new IndexOutOfBoundsException();
 		if (! contains(i)) throw new NoSuchElementException("Specified index is not in the queue");
-		if (keys[i].compareTo(key) <= 0) throw new IllegalArgumentException("Calling with this argument would not decrease the Key");
-		keys[i] = key;
-		swim(qp[i]);
+		if (comp.compare(keys[i+d], key) <= 0) throw new IllegalArgumentException("Calling with this argument would not decrease the Key");
+		keys[i+d] = key;
+		swim(qp[i+d]);
 	}
 
 	/**
 	 * Increases the key associated with index i to the given key
+	 * Runs in O(d*log-d(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -185,62 +223,67 @@ public class IndexDaryMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 * @throws java.util.IllegalArgumentException if the given key is lower than the current key
 	 */
 	public void increaseKey(int i, Key key) {
-		if (i < 0 || i >=NMAX) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >=nmax) throw new IndexOutOfBoundsException();
 		if (! contains(i)) throw new NoSuchElementException("Specified index is not in the queue");
-		if (keys[i].compareTo(key) >= 0) throw new IllegalArgumentException("Calling with this argument would not increase the Key");
-		keys[i] = key;
-		sink(qp[i]);
+		if (comp.compare(keys[i+d], key) >= 0) throw new IllegalArgumentException("Calling with this argument would not increase the Key");
+		keys[i+d] = key;
+		sink(qp[i+d]);
 	}
 
 	/**
 	 * Deletes the key associated the given index
+	 * Runs in O(d*log-d(n))
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.NoSuchElementException if the given index has no key associated with
 	 */
 	public void delete(int i) {
-		if (i < 0 || i >= NMAX) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= nmax) throw new IndexOutOfBoundsException();
 		if (! contains(i)) throw new NoSuchElementException("Specified index is not in the queue");
-		int idx = qp[i];
-		exch(idx, --N);
+		int idx = qp[i+d];
+		exch(idx, --n);
 		swim(idx);
 		sink(idx);
-		keys[i] = null;
-		qp[i] = -1;
+		keys[i+d] = null;
+		qp[i+d] = -1;
 	}
 	
 	/***************************
 	 * General helper functions
 	 **************************/
 	
+	//Compares two keys
 	private boolean greater(int i, int j) {
-		return keys[pq[i]].compareTo(keys[pq[j]]) > 0;
+		return comp.compare(keys[pq[i+d]+d], keys[pq[j+d]+d]) > 0;
 	}
 	
-	private void exch(int i, int j) {
+	//Exchanges two keys
+	private void exch(int x, int y) {
+		int i = x+d, j = y+d;
 		int swap = pq[i];
 		pq[i] = pq[j];
 		pq[j] = swap;
-		qp[pq[i]] = i;
-		qp[pq[j]] = j;
+		qp[pq[i]+d] = x;
+		qp[pq[j]+d] = y;
 	}
 	
 	/***************************
 	 * Functions for moving upward or downward
 	 **************************/
 	
+	//Moves upward
 	private void swim(int i) {
-		if (i > 0 && greater((i-1)/D, i)) {
-			exch(i, (i-1)/D);
-			swim((i-1)/D);
+		if (i > 0 && greater((i-1)/d, i)) {
+			exch(i, (i-1)/d);
+			swim((i-1)/d);
 		}
 	}
 	
+	//Moves downward
 	private void sink(int i) {
-		int child = D*i+1;
-		if (child >= N) return;
+		if (d*i+1 >= n) return;
 		int min = minChild(i);
-		while (min < N && greater(i, min)) {
+		while (min < n && greater(i, min)) {
 			exch(i, min);
 			i = min;
 			min = minChild(i);
@@ -251,11 +294,12 @@ public class IndexDaryMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 * Deletes the minimum child
 	 **************************/
 	
+	//Return the minimum child of i
 	private int minChild(int i) {
-		int loBound = D*i+1, hiBound = D*i+D;
+		int loBound = d*i+1, hiBound = d*i+d;
 		int min = loBound;
-		for (int cur = loBound ; cur <= hiBound ; cur++) {
-			if (cur < N && greater(min, cur)) min = cur;
+		for (int cur = loBound; cur <= hiBound; cur++) {
+			if (cur < n && greater(min, cur)) min = cur;
 		}
 		return min;
 	}
@@ -267,6 +311,9 @@ public class IndexDaryMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	/**
 	 * Get an Iterator over the indexes in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
+	 * iterator() : Runs in O(n)
+	 * next() : Runs in O(d*log-d(n))
+	 * hasNext() : Runs in O(1)
 	 * @return an Iterator over the indexes in the priority queue in ascending order
 	 */
 	
@@ -276,12 +323,12 @@ public class IndexDaryMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	
 	//Constructor an Iterator over the indices in linear time
 	private class MyIterator implements Iterator<Integer> {
-		IndexDaryMinPQ<Key> clone;
+		IndexMultiwayMinPQ<Key> clone;
 		
 		public MyIterator() {
-			clone = new IndexDaryMinPQ<Key>(NMAX, D);
-			for (int i = 0 ; i < N ; i++) {
-				clone.insert(pq[i], keys[pq[i]]);
+			clone = new IndexMultiwayMinPQ<Key>(comp, nmax, d);
+			for (int i = 0; i < n; i++) {
+				clone.insert(pq[i+d], keys[pq[i+d]+d]);
 			}
 		}
 
@@ -295,6 +342,18 @@ public class IndexDaryMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 		
 		public void remove() {
 			throw new UnsupportedOperationException();
+		}
+	}
+	
+	/***************************
+	 * Comparator
+	 **************************/
+	
+	//default Comparator
+	private class MyComparator implements Comparator<Key> {
+		@Override
+		public int compare(Key key1, Key key2) {
+			return ((Comparable<Key>) key1).compareTo(key2);
 		}
 	}
 

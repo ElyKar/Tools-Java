@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.NoSuchElementException;
 
 /**
- *  The BinomMinPQ class represents a priority queue of generic keys.
+ *  The BinomialMinPQ class represents a priority queue of generic keys.
  *  It supports the usual insert and delete-the-minimum operations, 
  *  along with the merging of two heaps together.
  *  It also supports methods for peeking at the minimum key,
@@ -22,53 +22,58 @@ import java.util.NoSuchElementException;
  *  @author Tristan Claverie
  */
 
-public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key> {
+public class BinomialMinPQ<Key> implements Iterable<Key> {
 	private Node head;    				//head of the list of roots
-	private final Comparator<Key> COMP;	//A Comparator over the keys
+	private final Comparator<Key> comp;	//Comparator over the keys
 	
-	//Represents a node of a Binomial Tree
+	//Represents a Node of a Binomial Tree
 	private class Node {
-		Key key;					//Key contained by the Node
-		int order;					//The order of the Binomial Tree rooted by this Node
-		Node child, sibling;		//child and sibling of this Node
+		Key key;						//Key contained by the Node
+		int order;						//The order of the Binomial Tree rooted by this Node
+		Node child, sibling;			//child and sibling of this Node
 	}
 	
 	/**
 	 * Initializes an empty priority queue
+	 * Runs in O(1)
 	 */
 	public BinomialMinPQ() {
-		COMP = new MyComparator();
+		comp = new MyComparator();
 	}
 	
 	/**
-	 * Initializes an empty priority queue
-	 * @param Comp a comparator over the keys
+	 * Initializes an empty priority queue using the given Comparator
+	 * Runs in O(1)
+	 * @param C a comparator over the keys
 	 */
-	public BinomialMinPQ(Comparator<Key> Comp) {
-		COMP = Comp;
+	public BinomialMinPQ(Comparator<Key> C) {
+		comp = C;
 	}
 	
 	/**
 	 * Initializes a priority queue with given keys
+	 * Runs in O(n*log(n))
 	 * @param a an array of keys
 	 */
 	public BinomialMinPQ(Key[] a) {
-		COMP = new MyComparator();
+		comp = new MyComparator();
 		for (Key k : a) insert(k);
 	}
 	
 	/**
-	 * Initializes a priority queue with given keys
+	 * Initializes a priority queue with given keys using the given Comparator
+	 * Runs in O(n*log(n))
 	 * @param Comp a comparator over the keys
 	 * @param a an array of keys
 	 */
 	public BinomialMinPQ(Comparator<Key> Comp, Key[] a) {
-		COMP = Comp;
+		comp = Comp;
 		for (Key k : a) insert(k);
 	}
 
 	/**
 	 * Whether the priority queue is empty
+	 * Runs in O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	public boolean isEmpty() {
@@ -76,15 +81,16 @@ public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key>
 	}
 
 	/**
-	 * Number of elements currently on the priority queue, takes logarithmic time
+	 * Number of elements currently on the priority queue
+	 * Runs in O(log(n))
+	 * @throws java.lang.ArithmeticException if there are more than 2^63-1 elements in the queue
 	 * @return the number of elements on the priority queue
 	 */
-	public int size() {
-		int result = 0, tmp;
-		Node node = head;
-		for (int i = 0 ; i < 32 && node != null ; i++) {
-			tmp = (node.order == i) ? 1 << i: 0;
-			node = (node.order == i) ? node.sibling : node;
+	public long size() {
+		long result = 0, tmp;
+		for (Node node = head; node != null; node = node.sibling) {
+			if (node.order > 62) { throw new ArithmeticException("The number of elements cannot be evaluated, but the priority queue is still valid."); }
+			tmp = 1 << node.order;
 			result |= tmp;
 		}
 		return result;
@@ -92,23 +98,24 @@ public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key>
 
 	/**
 	 * Put a Key in the heap
+	 * Runs in O(log(n))
 	 * @param key a Key
 	 */
 	public void insert(Key key) {
 		Node x = new Node();
 		x.key = key;
 		x.order = 0;
-		BinomialMinPQ<Key> H = new BinomialMinPQ<>();
+		BinomialMinPQ<Key> H = new BinomialMinPQ<>(); //The Comparator oh the H heap is not used
 		H.head = x;
 		this.head = this.union(H).head;
 	}
 
 	/**
 	 * Get the minimum key currently in the queue
+	 * Runs in O(log(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
-	
 	public Key minKey() {
 		if (isEmpty()) throw new NoSuchElementException("Priority queue is empty");
 		Node min = head;
@@ -122,10 +129,10 @@ public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key>
 
 	/**
 	 * Delete the minimum key
+	 * Runs in O(log(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key
 	 */
-	
 	public Key delMin() {
 		if(isEmpty()) throw new NoSuchElementException("Priority queue is empty");
 		Node min = eraseMin();
@@ -147,16 +154,17 @@ public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key>
 	}
 	
 	/**
-	 * Merge two Binomial heaps together in logarithmic time
+	 * Merge two Binomial heaps together
+	 * This operation is destructive
+	 * Runs in O(log(n))
+	 * This operation is destructive.
 	 * @throws java.util.IllegalArgumentException if the heap in parameter is null
 	 * @return the union of two heaps
 	 */
-	
 	public BinomialMinPQ<Key> union(BinomialMinPQ<Key> heap) {
 		if (heap == null) throw new IllegalArgumentException("Cannot merge a Binomial Heap with null");
-		BinomialMinPQ<Key> H = new BinomialMinPQ<>();
-		H.head = merge(new Node(), this.head, heap.head).sibling;
-		Node x = H.head;
+		this.head = merge(new Node(), this.head, heap.head).sibling;
+		Node x = this.head;
 		Node prevx = null, nextx = x.sibling;
 		while (nextx != null) {
 			if (x.order < nextx.order ||
@@ -166,24 +174,25 @@ public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key>
 				x.sibling = nextx.sibling;
 				link(nextx, x);
 			} else {
-				if (prevx == null) { H.head = nextx; }
+				if (prevx == null) { this.head = nextx; }
 				else { prevx.sibling = nextx; }
 				link(x, nextx);
 				x = nextx;
 			}
 			nextx = x.sibling;
 		}
-		return H;
+		return this;
 	}
 	
 	/*************************************************
 	 * General helper functions
 	 ************************************************/
 	
+	//Compares two keys
 	private boolean greater(Key n, Key m) {
 		if (n == null) return false;
 		if (m == null) return true;
-		return COMP.compare(n, m) > 0;
+		return comp.compare(n, m) > 0;
 	}
 	
 	//Assuming root1 holds a greater key than root2, root2 becomes the new root
@@ -231,9 +240,11 @@ public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key>
 	/**
 	 * Get an Iterator over the keys in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
+	 * iterator() : Runs in O(n)
+	 * next() : Runs in O(log(n))
+	 * hasNext() : Runs in O(1)
 	 * @return an Iterator over the keys in the priority queue in ascending order
 	 */
-	
 	public Iterator<Key> iterator() {
 		return new MyIterator();
 	}
@@ -244,7 +255,7 @@ public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key>
 		//Constructor clones recursively the elements in the queue
 		//It takes linear time
 		public MyIterator() {
-			data = new BinomialMinPQ<Key>();
+			data = new BinomialMinPQ<Key>(comp);
 			data.head = clone(head, false, false, null);
 		}
 		
@@ -278,7 +289,7 @@ public class BinomialMinPQ<Key extends Comparable<Key>> implements Iterable<Key>
 	private class MyComparator implements Comparator<Key> {
 		@Override
 		public int compare(Key key1, Key key2) {
-			return key1.compareTo(key2);
+			return ((Comparable<Key>) key1).compareTo(key2);
 		}
 	}
 	

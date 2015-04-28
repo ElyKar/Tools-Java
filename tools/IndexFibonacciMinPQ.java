@@ -1,12 +1,13 @@
 package tools;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 
 /**
- *  The IndexFiboMinPQ class represents an indexed priority queue of generic keys.
+ *  The IndexFibonacciMinPQ class represents an indexed priority queue of generic keys.
  *  It supports the usual insert and delete-the-minimum operations,
  *  along with delete and change-the-key methods. 
  *  In order to let the client refer to keys on the priority queue,
@@ -26,37 +27,55 @@ import java.util.NoSuchElementException;
  *
  *  @author Tristan Claverie
  */
-public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Integer> {
-	private Node<Key>[] nodes;	//Array of Nodes in the heap
-	private Node<Key> head;		//Head of the circular root list
-	private Node<Key> min;		//Minimum Node of the root list
-	private int size;			//Number of keys in the heap
-	private int N;				//Maximum number of elements in the heap
+public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
+	private Node<Key>[] nodes;			//Array of Nodes in the heap
+	private Node<Key> head;				//Head of the circular root list
+	private Node<Key> min;				//Minimum Node in the heap
+	private int size;					//Number of keys in the heap
+	private int n;						//Maximum number of elements in the heap
+	private final Comparator<Key> comp; //Comparator over the keys
 	private HashMap<Integer, Node<Key>> table = new HashMap<>(); //Used for the consolidate operation
 	
 	//Represents a Node of a tree
 	private class Node<Key> {
-		Key key;					//Key of the Node
-		int order;					//The order of the tree rooted by this Node
-		int index;					//Index associated with the key
-		Node<Key> prev, next;		//siblings of the Node
-		Node<Key> parent, child;	//parent and child of this Node
-		boolean mark;				//Indicates if this Node already lost a child
+		Key key;						//Key of the Node
+		int order;						//The order of the tree rooted by this Node
+		int index;						//Index associated with the key
+		Node<Key> prev, next;			//siblings of the Node
+		Node<Key> parent, child;		//parent and child of this Node
+		boolean mark;					//Indicates if this Node already lost a child
 	}
 	
 	/**
-     * Initializes an empty indexed priority queue with indices between 0 and N-1.
+     * Initializes an empty indexed priority queue with indices between 0 and N-1
+     * Runs in O(n)
      * @param N number of keys in the priority queue, index from 0 to N-1
      * @throws java.lang.IllegalArgumentException if N < 0
      */
-	public IndexFiboMinPQ(int NMAX) {
-		if (N < 0) throw new IllegalArgumentException("Cannot create a priority queue of negative size");
-		N = NMAX;
-		nodes = (Node<Key>[]) new Node[N];
+	public IndexFibonacciMinPQ(int N) {
+		if (n < 0) throw new IllegalArgumentException("Cannot create a priority queue of negative size");
+		n = N;
+		nodes = (Node<Key>[]) new Node[n];
+		comp = new MyComparator();
+	}
+	
+	/**
+     * Initializes an empty indexed priority queue with indices between 0 and N-1
+     * Runs in O(n)
+     * @param N number of keys in the priority queue, index from 0 to N-1
+     * @param C a Comparator over the keys
+     * @throws java.lang.IllegalArgumentException if N < 0
+     */
+	public IndexFibonacciMinPQ(Comparator<Key> C, int N) {
+		if (n < 0) throw new IllegalArgumentException("Cannot create a priority queue of negative size");
+		n = N;
+		nodes = (Node<Key>[]) new Node[n];
+		comp = C;
 	}
 
 	/**
 	 * Whether the priority queue is empty
+	 * Runs in O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	
@@ -66,18 +85,20 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Does the priority queue contains the index i ?
+	 * Runs in O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @return true if i is on the priority queue, false if not
 	 */
 	
 	public boolean contains(int i) {
-		if (i < 0 || i >= N) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= n) throw new IndexOutOfBoundsException();
 		else 				 return nodes[i] != null;
 	}
 
 	/**
-	 * Number of elements currently on the priority queue, takes constant time
+	 * Number of elements currently on the priority queue
+	 * Runs in O(1)
 	 * @return the number of elements on the priority queue
 	 */
 	
@@ -87,6 +108,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Associates a key with an index
+	 * Runs in O(1)
 	 * @param i an index
 	 * @param key a Key associated with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -94,7 +116,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 */
 	
 	public void insert(int i, Key key) {
-		if (i < 0 || i >= N) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= n) throw new IndexOutOfBoundsException();
 		if (contains(i)) throw new IllegalArgumentException("Specified index is already in the queue");
 		Node<Key> x = new Node<>();
 		x.key = key;
@@ -108,6 +130,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Get the index associated with the minimum key
+	 * Runs in O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
@@ -119,6 +142,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Get the minimum key currently in the queue
+	 * Runs in O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
@@ -130,6 +154,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Delete the minimum key
+	 * Runs in O(log(n)) (amortized)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
@@ -139,14 +164,14 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 		head = cut(min, head);
 		Node<Key> x = min.child;
 		int index = min.index;
-		min.key = null;
+		min.key = null;					//For garbage collection
 		if (x != null) {
 			do {
 				x.parent = null;
 				x = x.next;
 			} while (x != min.child);
 			head = meld(head, x);
-			min.child = null;
+			min.child = null;			//For garbage collection
 		}
 		size--;
 		if (!isEmpty()) consolidate();
@@ -157,6 +182,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Get the key associated with index i
+	 * Runs in O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.NoSuchElementException if the index is not in the queue
@@ -164,13 +190,15 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 */
 	
 	public Key keyOf(int i) {
-		if (i < 0 || i >= N) throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= n) throw new IndexOutOfBoundsException();
 		if (!contains(i)) throw new NoSuchElementException("Specified index is not in the queue");
 		return nodes[i].key;
 	}
 
 	/**
 	 * Changes the key associated with index i to the given key
+	 * If the given key is greater, runs in O(log(n))
+	 * If the given key is lower, runs in O(1) (amortized)
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -178,7 +206,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 */
 	
 	public void changeKey(int i, Key key) {
-		if (i < 0 || i >= N) 		throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= n) 		throw new IndexOutOfBoundsException();
 		if (!contains(i))			throw new NoSuchElementException("Specified index is not in the queue");
 		if (greater(key, nodes[i].key))  increaseKey(i, key);
 		else 							 decreaseKey(i, key);
@@ -186,6 +214,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Decreases the key associated with index i to the given key
+	 * Runs in O(1) (amortized).
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -194,7 +223,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 */
 	
 	public void decreaseKey(int i, Key key) {
-		if (i < 0 || i >= N) 		throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= n) 		throw new IndexOutOfBoundsException();
 		if (!contains(i))			throw new NoSuchElementException("Specified index is not in the queue");
 		if (greater(key, nodes[i].key))  throw new IllegalArgumentException("Calling with this argument would not decrease the key");
 		Node<Key> x = nodes[i];
@@ -207,6 +236,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Increases the key associated with index i to the given key
+	 * Runs in O(log(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -215,7 +245,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 */
 	
 	public void increaseKey(int i, Key key) {
-		if (i < 0 || i >= N) 		throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= n) 		throw new IndexOutOfBoundsException();
 		if (!contains(i))			throw new NoSuchElementException("Specified index is not in the queue");
 		if (greater(nodes[i].key, key))  throw new IllegalArgumentException("Calling with this argument would not increase the key");
 		delete(i);
@@ -224,21 +254,24 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 
 	/**
 	 * Deletes the key associated the given index
+	 * Runs in O(log(n)) (amortized)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.NoSuchElementException if the given index has no key associated with
 	 */
 	
 	public void delete(int i) {
-		if (i < 0 || i >= N) 		throw new IndexOutOfBoundsException();
+		if (i < 0 || i >= n) 		throw new IndexOutOfBoundsException();
 		if (!contains(i))			throw new NoSuchElementException("Specified index is not in the queue");
 		Node<Key> x = nodes[i];
+		x.key = null;				//For garbage collection
 		if (x.parent != null) {
 			cut(i);
 		}
 		head = cut(x, head);
 		if (x.child != null) {
 			Node<Key> child = x.child;
+			x.child = null;			//For garbage collection
 			x = child;
 			do {
 				child.parent = null;
@@ -256,10 +289,11 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 * General helper functions
 	 ************************************/
 	
+	//Compares two keys
 	private boolean greater(Key n, Key m) {
 		if (n == null) return false;
 		if (m == null) return true;
-		return n.compareTo(m) > 0;
+		return comp.compare(n,  m) > 0;
 	}
 	
 	//Assuming root1 holds a greater key than root2, root2 becomes the new root
@@ -273,6 +307,8 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 * Function for decreasing a key
 	 ************************************/
 	
+	//Removes a Node from its parent's child list and insert it in the root list
+	//If the parent Node already lost a child, reshapes the heap accordingly
 	private void cut(int i) {
 		Node<Key> x = nodes[i];
 		Node<Key> parent = x.parent;
@@ -289,12 +325,14 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 * Function for consolidating all trees in the root list
 	 ************************************/
 	
+	//Coalesces the roots, thus reshapes the heap
+	//Caching a HashMap improves greatly performances
 	private void consolidate() {
 		table.clear();
 		Node<Key> x = head;
 		int maxOrder = 0;
 		min = head;
-		Node<Key> y = null; Node<Key> z = null;
+		Node<Key> y = null, z = null;
 		do {
 			y = x;
 			x = x.next;
@@ -314,10 +352,8 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 		} while (x != head);
 		head = null;
 		for (Node<Key> n : table.values()) {
-			if (n != null) {
-				if (min.key.compareTo(n.key) >= 0) min = n;
-				head = insert(n, head);
-			}
+			min = greater(min.key, n.key) ? n : min;
+			head = insert(n, head);
 		}
 	}
 	
@@ -325,7 +361,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	 * General helper functions for manipulating circular lists
 	 ************************************/
 	
-	//insert a Node in a circular list containing head, returns a new head
+	//Inserts a Node in a circular list containing head, returns a new head
 	private Node<Key> insert(Node<Key> x, Node<Key> head) {
 		if (head == null) {
 			x.prev = x;
@@ -356,8 +392,7 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 		}
 	}
 	
-	//We assume both lists are different and belongs to the same heap,
-	//so we don't have to update the min pointer
+	//Merges two lists together.
 	private Node<Key> meld(Node<Key> x, Node<Key> y) {
 		if (x == null) return y;
 		if (y == null) return x;
@@ -375,6 +410,9 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	/**
 	 * Get an Iterator over the indexes in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
+	 * iterator() : Runs in O(n)
+	 * next() : Runs in O(log(n)) (amortized)
+	 * hasNext() : Runs in O(1)
 	 * @return an Iterator over the indexes in the priority queue in ascending order
 	 */
 	
@@ -383,12 +421,12 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 	}
 	
 	private class MyIterator implements Iterator<Integer> {
-		private IndexFiboMinPQ<Key> copy;
+		private IndexFibonacciMinPQ<Key> copy;
 		
 		
 		//Constructor takes linear time
 		public MyIterator() {
-			copy = new IndexFiboMinPQ<>(N);
+			copy = new IndexFibonacciMinPQ<>(comp, n);
 			for (Node<Key> x : nodes) {
 				if (x != null) copy.insert(x.index, x.key);
 			}
@@ -406,6 +444,18 @@ public class IndexFiboMinPQ<Key extends Comparable<Key>> implements Iterable<Int
 		public Integer next() {
 			if (!hasNext()) throw new NoSuchElementException();
 			return copy.delMin();
+		}
+	}
+	
+	/***************************
+	 * Comparator
+	 **************************/
+	
+	//default Comparator
+	private class MyComparator implements Comparator<Key> {
+		@Override
+		public int compare(Key key1, Key key2) {
+			return ((Comparable<Key>) key1).compareTo(key2);
 		}
 	}
 	
