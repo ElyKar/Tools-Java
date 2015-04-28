@@ -48,7 +48,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 	
 	/**
      * Initializes an empty indexed priority queue with indices between 0 and N-1
-     * Runs in O(n)
+     * Worst case is O(n)
      * @param N number of keys in the priority queue, index from 0 to N-1
      * @throws java.lang.IllegalArgumentException if N < 0
      */
@@ -61,7 +61,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 	
 	/**
      * Initializes an empty indexed priority queue with indices between 0 and N-1
-     * Runs in O(n)
+     * Worst case is O(n)
      * @param N number of keys in the priority queue, index from 0 to N-1
      * @param C a Comparator over the keys
      * @throws java.lang.IllegalArgumentException if N < 0
@@ -75,7 +75,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Whether the priority queue is empty
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	
@@ -85,7 +85,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Does the priority queue contains the index i ?
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @return true if i is on the priority queue, false if not
@@ -98,7 +98,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Number of elements currently on the priority queue
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return the number of elements on the priority queue
 	 */
 	
@@ -108,7 +108,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Associates a key with an index
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param i an index
 	 * @param key a Key associated with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -130,7 +130,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Get the index associated with the minimum key
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
@@ -142,7 +142,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Get the minimum key currently in the queue
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
@@ -154,7 +154,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Delete the minimum key
-	 * Runs in O(log(n)) (amortized)
+	 * Worst case is O(log(n)) (amortized)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
@@ -182,7 +182,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Get the key associated with index i
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.NoSuchElementException if the index is not in the queue
@@ -197,8 +197,8 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Changes the key associated with index i to the given key
-	 * If the given key is greater, runs in O(log(n))
-	 * If the given key is lower, runs in O(1) (amortized)
+	 * If the given key is greater, Worst case is O(log(n))
+	 * If the given key is lower, Worst case is O(1) (amortized)
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -214,7 +214,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Decreases the key associated with index i to the given key
-	 * Runs in O(1) (amortized).
+	 * Worst case is O(1) (amortized).
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -236,7 +236,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Increases the key associated with index i to the given key
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -254,7 +254,7 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Deletes the key associated the given index
-	 * Runs in O(log(n)) (amortized)
+	 * Worst case is O(log(n)) (amortized)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.NoSuchElementException if the given index has no key associated with
@@ -410,9 +410,9 @@ public class IndexFibonacciMinPQ<Key> implements Iterable<Integer> {
 	/**
 	 * Get an Iterator over the indexes in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
-	 * iterator() : Runs in O(n)
-	 * next() : Runs in O(log(n)) (amortized)
-	 * hasNext() : Runs in O(1)
+	 * iterator() : Worst case is O(n)
+	 * next() : 	Worst case is O(log(n)) (amortized)
+	 * hasNext() : 	Worst case is O(1)
 	 * @return an Iterator over the indexes in the priority queue in ascending order
 	 */
 	

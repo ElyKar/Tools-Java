@@ -42,7 +42,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 	
 	/**
      * Initializes an empty indexed priority queue with indices between 0 and N-1
-     * Runs in O(n)
+     * Worst case is O(n)
      * @param N number of keys in the priority queue, index from 0 to N-1
      * @throws java.lang.IllegalArgumentException if N < 0
      */
@@ -55,7 +55,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 	
 	/**
      * Initializes an empty indexed priority queue with indices between 0 and N-1
-     * Runs in O(n)
+     * Worst case is O(n)
      * @param N number of keys in the priority queue, index from 0 to N-1
      * @Param C a Comparator over the keys
      * @throws java.lang.IllegalArgumentException if N < 0
@@ -69,7 +69,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Whether the priority queue is empty
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	public boolean isEmpty() {
@@ -78,7 +78,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Does the priority queue contains the index i ?
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @return true if i is on the priority queue, false if not
@@ -90,13 +90,13 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Number of elements currently on the priority queue
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @return the number of elements on the priority queue
 	 */
-	public long size() {
-		long result = 0, tmp;
+	public int size() {
+		int result = 0, tmp;
 		for (Node<Key> node = head; node != null; node = node.sibling) {
-			if (node.order > 62) { throw new ArithmeticException("The number of elements cannot be evaluated, but the priority queue is still valid."); }
+			if (node.order > 30) { throw new ArithmeticException("The number of elements cannot be evaluated, but the priority queue is still valid."); }
 			tmp =  1 << node.order;
 			result |= tmp;
 		}
@@ -105,7 +105,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Associates a key with an index
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @param i an index
 	 * @param key a Key associated with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -125,8 +125,8 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 	}
 
 	/**
-	 * Get the index associated with the minimum key
-	 * Runs in O(log(n))
+	 * Gets the index associated with the minimum key
+	 * Worst case is O(log(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
@@ -143,8 +143,8 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 	}
 
 	/**
-	 * Get the minimum key currently in the queue
-	 * Runs in O(log(n))
+	 * Gets the minimum key currently in the queue
+	 * Worst case is O(log(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
@@ -161,8 +161,8 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 	}
 
 	/**
-	 * Delete the minimum key
-	 * Runs in O(log(n))
+	 * Deletes the minimum key
+	 * Worst case is O(log(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
@@ -190,8 +190,8 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 	}
 
 	/**
-	 * Get the key associated with index i
-	 * Runs in O(1)
+	 * Gets the key associated with index i
+	 * Worst case is O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.IllegalArgumentException if the index is not in the queue
@@ -206,7 +206,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Changes the key associated with index i to the given key
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -217,12 +217,12 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 		if (i < 0 || i >= n) 		throw new IndexOutOfBoundsException();
 		if (!contains(i))			throw new IllegalArgumentException("Specified index is not in the queue");
 		if (greater(nodes[i].key, key))  decreaseKey(i, key);
-		else 						increaseKey(i, key);
+		else 							 increaseKey(i, key);
 	}
 
 	/**
 	 * Decreases the key associated with index i to the given key
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -241,7 +241,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Increases the key associated with index i to the given key
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -259,7 +259,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Deletes the key associated the given index
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.NoSuchElementException if the given index has no key associated with
@@ -300,7 +300,7 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 		return comp.compare(n, m) > 0;
 	}
 	
-	//Exchange the positions of two nodes
+	//Exchanges the positions of two nodes
 	private void exchange(Node<Key> x, Node<Key> y) {
 		Key tempKey = x.key; x.key = y.key; y.key = tempKey;
 		int tempInt = x.index; x.index = y.index; y.index = tempInt;
@@ -432,11 +432,11 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 	 *****************************************************************/
 	
 	/**
-	 * Get an Iterator over the indexes in the priority queue in ascending order
+	 * Gets an Iterator over the indexes in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
-	 * iterator() : Runs in O(n)
-	 * next() : Runs in O(log(n))
-	 * hasNext() : Runs in O(1)
+	 * iterator() : Worst case is O(n)
+	 * next() : 	Worst case is O(log(n))
+	 * hasNext() : 	Worst case is O(1)
 	 * @return an Iterator over the indexes in the priority queue in ascending order
 	 */
 	
@@ -490,36 +490,5 @@ public class IndexBinomialMinPQ<Key> implements Iterable<Integer> {
 			return ((Comparable<Key>) key1).compareTo(key2);
 		}
 	}
-	
-	public static void main(String[] args) {
-        // insert a bunch of strings
-        String[] strings = { "it", "was", "the", "best", "of", "times", "it", "was", "the", "worst" };
-
-        IndexBinomialMinPQ<String> pq = new IndexBinomialMinPQ<String>(strings.length);
-        for (int i = 0; i < strings.length; i++) {
-            pq.insert(i, strings[i]);
-        }
-
-        // delete and print each key
-        while (!pq.isEmpty()) {
-            int i = pq.delMin();
-            System.out.println(i + " " + strings[i]);
-        }
-        System.out.println();
-
-        // reinsert the same strings
-        for (int i = 0; i < strings.length; i++) {
-            pq.insert(i, strings[i]);
-        }
-
-        // print each key using the iterator
-        for (int i : pq) {
-            System.out.println(i + " " + strings[i]);
-        }
-        while (!pq.isEmpty()) {
-            pq.delMin();
-        }
-
-    }
 	
 }

@@ -39,7 +39,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 	
 	/**
 	 * Initializes an empty priority queue
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param C a Comparator over the Keys
 	 */
 	public FibonacciMinPQ(Comparator<Key> C) {
@@ -48,7 +48,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 	
 	/**
      * Initializes an empty priority queue
-     * Runs in O(1)
+     * Worst case is O(1)
      */
 	public FibonacciMinPQ() {
 		comp = new MyComparator();
@@ -56,7 +56,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 	
 	/**
 	 * Initializes a priority queue with given keys
-	 * Runs in O(n)
+	 * Worst case is O(n)
 	 * @param a an array of keys
 	 */
 	public FibonacciMinPQ(Key[] a) {
@@ -66,7 +66,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 	
 	/**
 	 * Initializes a priority queue with given keys
-	 * Runs in O(n)
+	 * Worst case is O(n)
 	 * @param C a comparator over the keys
 	 * @param a an array of keys
 	 */
@@ -77,7 +77,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 
 	/**
 	 * Whether the priority queue is empty
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	public boolean isEmpty() {
@@ -86,7 +86,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 
 	/**
 	 * Number of elements currently on the priority queue
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return the number of elements on the priority queue
 	 */
 	public int size() {
@@ -95,7 +95,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 
 	/**
 	 * Insert a key in the queue
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param key a Key
 	 */
 	public void insert(Key key) {
@@ -108,8 +108,8 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 	}
 
 	/**
-	 * Get the minimum key currently in the queue
-	 * Runs in O(1)
+	 * Gets the minimum key currently in the queue
+	 * Worst case is O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
@@ -120,7 +120,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 
 	/**
 	 * Deletes the minimum key
-	 * Runs in O(log(n)) (amortized)
+	 * Worst case is O(log(n)) (amortized)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key
 	 */
@@ -141,9 +141,9 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 	}
 	
 	/**
-	 * Merge two heaps together
+	 * Merges two heaps together
 	 * This operation is destructive
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param that a Fibonacci heap
 	 * @return the union of the two heaps
 	 */
@@ -243,8 +243,7 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 		}
 	}
 	
-	//We assume both lists are different and belongs to the same heap,
-	//so we don't have to update the min pointer
+	//Merges two root lists together
 	private Node meld(Node x, Node y) {
 		if (x == null) return y;
 		if (y == null) return x;
@@ -260,11 +259,11 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 	 ************************************/
 	
 	/**
-	 * Get an Iterator over the Keys in the priority queue in ascending order
+	 * Gets an Iterator over the Keys in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
-	 * iterator() : Runs in O(n)
-	 * next() : Runs in O(log(n)) (amortized)
-	 * hasNext() : Runs in O(1)
+	 * iterator() : Worst case is O(n)
+	 * next() : 	Worst case is O(log(n)) (amortized)
+	 * hasNext() : 	Worst case is O(1)
 	 * @return an Iterator over the Keys in the priority queue in ascending order
 	 */
 	
@@ -319,33 +318,4 @@ public class FibonacciMinPQ<Key> implements Iterable<Key> {
 		}
 	}
 	
-	public static void main(String[] args) {
-        // insert a bunch of strings
-        String[] strings = { "it", "was", "the", "best", "of", "times", "it", "was", "the", "worst" };
-
-        MultiwayMinPQ<String> pq = new MultiwayMinPQ<>(4);
-        for (int i = 0; i < strings.length; i++) {
-            pq.insert(strings[i]);
-        }
-
-        // delete and print each key
-        while (!pq.isEmpty()) {
-            System.out.println(pq.delMin());
-        }
-        System.out.println();
-
-        // reinsert the same strings
-        for (int i = 0; i < strings.length; i++) {
-            pq.insert(strings[i]);
-        }
-
-        // print each key using the iterator
-        for (String s : pq) {
-            System.out.println(s);
-        }
-        while (!pq.isEmpty()) {
-            pq.delMin();
-        }
-
-    }
 }

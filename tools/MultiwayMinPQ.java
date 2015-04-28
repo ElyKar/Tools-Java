@@ -33,7 +33,7 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	
 	/**
      * Initializes an empty priority queue
-     * Runs in O(d)
+     * Worst case is O(d)
      * @param D dimension of the heap
      * @throws java.lang.IllegalArgumentException if D < 2
      */
@@ -47,12 +47,12 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	
 	/**
      * Initializes an empty priority queue
-     * Runs in O(d)
+     * Worst case is O(d)
      * @param D dimension of the heap
      * @param C a Comparator over the keys
      * @throws java.lang.IllegalArgumentException if D < 2
      */
-	public MultiwayMinPQ(int D, Comparator<Key> C) {
+	public MultiwayMinPQ(Comparator<Key> C, int D) {
 		if (D < 2) throw new IllegalArgumentException("Dimension should be 2 or over");
 		this.d = D;
 		order = 1;
@@ -62,12 +62,12 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	
 	/**
      * Initializes a priority queue with given indexes
-     * Runs in O(n*log-d(n))
+     * Worst case is O(n*log-d(n))
      * @param D dimension of the heap
      * @param a an array of keys
      * @throws java.lang.IllegalArgumentException if D < 2
      */
-	public MultiwayMinPQ(int D, Key[] a) {
+	public MultiwayMinPQ(Key[] a, int D) {
 		if (D < 2) throw new IllegalArgumentException("Dimension should be 2 or over");
 		this.d = D;
 		order = 1;
@@ -78,13 +78,13 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	
 	/**
      * Initializes a priority queue with given indexes
-     * Runs in O(a*log-d(n))
+     * Worst case is O(a*log-d(n))
      * @param D dimension of the heap
      * @param C a Comparator over the keys
      * @param a an array of keys
      * @throws java.lang.IllegalArgumentException if D < 2
      */
-	public MultiwayMinPQ(int D, Comparator<Key> C, Key[] a) {
+	public MultiwayMinPQ(Comparator<Key> C, Key[] a, int D) {
 		if (D < 2) throw new IllegalArgumentException("Dimension should be 2 or over");
 		this.d = D;
 		order = 1;
@@ -95,7 +95,7 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 
 	/**
 	 * Whether the priority queue is empty
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	public boolean isEmpty() {
@@ -104,7 +104,7 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 
 	/**
 	 * Number of elements currently on the priority queue
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return the number of elements on the priority queue
 	 */
 	public int size() {
@@ -112,8 +112,8 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	}
 
 	/**
-	 * Add a Key to the priority queue
-	 * Runs in O(log-d(n))
+	 * Puts a Key on the priority queue
+	 * Worst case is O(log-d(n))
 	 * @param key a Key
 	 */
 	public void insert(Key key) {
@@ -126,8 +126,8 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	}
 
 	/**
-	 * Get the minimum key currently in the queue
-	 * Runs in O(1)
+	 * Gets the minimum key currently in the queue
+	 * Worst case is O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
@@ -137,8 +137,8 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	}
 
 	/**
-	 * Delete the minimum key
-	 * Runs in O(d*log-d(n))
+	 * Deletes the minimum key
+	 * Worst case is O(d*log-d(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key
 	 */
@@ -168,7 +168,7 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 		return comp.compare(keys[i], keys[j]) > 0;
 	}
 	
-	//Exchange the position of two keys
+	//Exchanges the position of two keys
 	private void exch(int x, int y) {
 		int i = x+d, j = y+d;
 		Key swap = keys[i];
@@ -176,7 +176,7 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 		keys[j] = swap;
 	}
 	
-	//Get the maximum number of keys in the heap, given the number of levels of the tree
+	//Gets the maximum number of keys in the heap, given the number of levels of the tree
 	private int getN(int order) {
 		return (1-((int)Math.pow(d, order+1)))/(1-d);
 	}
@@ -209,7 +209,7 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	 * Deletes the minimum child
 	 **************************/
 	
-	//Return the minimum of the childs starting at position i
+	//Return the minimum child of i
 	private int minChild(int i) {
 		int loBound = d*i+1, hiBound = d*i+d;
 		int min = loBound;
@@ -240,11 +240,11 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 	 **************************/
 	
 	/**
-	 * Get an Iterator over the keys in the priority queue in ascending order
+	 * Gets an Iterator over the keys in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
-	 * iterator() : Runs in O(n)
-	 * next() : Runs in O(d*log-d(n))
-	 * hasNext() : Runs in O(1)
+	 * iterator() : Worst case is O(n)
+	 * next() : 	Worst case is O(d*log-d(n))
+	 * hasNext() : 	Worst case is O(1)
 	 * @return an Iterator over the keys in the priority queue in ascending order
 	 */
 	
@@ -257,7 +257,7 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 		MultiwayMinPQ<Key> data;
 		
 		public MyIterator() {
-			data = new MultiwayMinPQ<Key>(d, comp);
+			data = new MultiwayMinPQ<Key>(comp, d);
 			data.keys = (Key[]) new Comparable[keys.length];
 			data.n = n;
 			for (int i = 0; i < keys.length; i++) {
@@ -289,36 +289,5 @@ public class MultiwayMinPQ<Key> implements Iterable<Key> {
 			return ((Comparable<Key>) key1).compareTo(key2);
 		}
 	}
-	
-	public static void main(String[] args) {
-        // insert a bunch of strings
-        String[] strings = { "it", "was", "the", "best", "of", "times", "it", "was", "the", "worst" };
-
-        MultiwayMinPQ<String> pq = new MultiwayMinPQ<>(4);
-        for (int i = 0; i < strings.length; i++) {
-            pq.insert(strings[i]);
-        }
-
-        // delete and print each key
-        while (!pq.isEmpty()) {
-        	System.out.println(pq.minKey());
-            System.out.println(pq.delMin());
-        }
-        System.out.println();
-
-        // reinsert the same strings
-        for (int i = 0; i < strings.length; i++) {
-            pq.insert(strings[i]);
-        }
-
-        // print each key using the iterator
-        for (String s : pq) {
-            System.out.println(s);
-        }
-        while (!pq.isEmpty()) {
-            pq.delMin();
-        }
-
-    }
 	
 }

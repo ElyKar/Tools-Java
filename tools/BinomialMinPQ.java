@@ -35,7 +35,7 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 	
 	/**
 	 * Initializes an empty priority queue
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 */
 	public BinomialMinPQ() {
 		comp = new MyComparator();
@@ -43,7 +43,7 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 	
 	/**
 	 * Initializes an empty priority queue using the given Comparator
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param C a comparator over the keys
 	 */
 	public BinomialMinPQ(Comparator<Key> C) {
@@ -52,7 +52,7 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 	
 	/**
 	 * Initializes a priority queue with given keys
-	 * Runs in O(n*log(n))
+	 * Worst case is O(n*log(n))
 	 * @param a an array of keys
 	 */
 	public BinomialMinPQ(Key[] a) {
@@ -62,18 +62,18 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 	
 	/**
 	 * Initializes a priority queue with given keys using the given Comparator
-	 * Runs in O(n*log(n))
-	 * @param Comp a comparator over the keys
+	 * Worst case is O(n*log(n))
+	 * @param C a comparator over the keys
 	 * @param a an array of keys
 	 */
-	public BinomialMinPQ(Comparator<Key> Comp, Key[] a) {
-		comp = Comp;
+	public BinomialMinPQ(Comparator<Key> C, Key[] a) {
+		comp = C;
 		for (Key k : a) insert(k);
 	}
 
 	/**
 	 * Whether the priority queue is empty
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	public boolean isEmpty() {
@@ -82,14 +82,14 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 
 	/**
 	 * Number of elements currently on the priority queue
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @throws java.lang.ArithmeticException if there are more than 2^63-1 elements in the queue
 	 * @return the number of elements on the priority queue
 	 */
-	public long size() {
-		long result = 0, tmp;
+	public int size() {
+		int result = 0, tmp;
 		for (Node node = head; node != null; node = node.sibling) {
-			if (node.order > 62) { throw new ArithmeticException("The number of elements cannot be evaluated, but the priority queue is still valid."); }
+			if (node.order > 30) { throw new ArithmeticException("The number of elements cannot be evaluated, but the priority queue is still valid."); }
 			tmp = 1 << node.order;
 			result |= tmp;
 		}
@@ -97,8 +97,8 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 	}
 
 	/**
-	 * Put a Key in the heap
-	 * Runs in O(log(n))
+	 * Puts a Key in the heap
+	 * Worst case is O(log(n))
 	 * @param key a Key
 	 */
 	public void insert(Key key) {
@@ -112,7 +112,7 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 
 	/**
 	 * Get the minimum key currently in the queue
-	 * Runs in O(log(n))
+	 * Worst case is O(log(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
@@ -128,8 +128,8 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 	}
 
 	/**
-	 * Delete the minimum key
-	 * Runs in O(log(n))
+	 * Deletes the minimum key
+	 * Worst case is O(log(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key
 	 */
@@ -154,10 +154,10 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 	}
 	
 	/**
-	 * Merge two Binomial heaps together
+	 * Merges two Binomial heaps together
 	 * This operation is destructive
-	 * Runs in O(log(n))
-	 * This operation is destructive.
+	 * Worst case is O(log(n))
+	 * @param heap a Binomial Heap to be merged with the current heap
 	 * @throws java.util.IllegalArgumentException if the heap in parameter is null
 	 * @return the union of two heaps
 	 */
@@ -202,7 +202,7 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 		root2.order++;
 	}
 	
-	//deletes and return the node containing the minimum key
+	//Deletes and return the node containing the minimum key
 	private Node eraseMin() {
 		Node min = head;
 		Node previous = new Node();
@@ -238,11 +238,11 @@ public class BinomialMinPQ<Key> implements Iterable<Key> {
 	 *****************************************************************/
 	
 	/**
-	 * Get an Iterator over the keys in the priority queue in ascending order
+	 * Gets an Iterator over the keys in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
-	 * iterator() : Runs in O(n)
-	 * next() : Runs in O(log(n))
-	 * hasNext() : Runs in O(1)
+	 * iterator() : Worst case is O(n)
+	 * next() : 	Worst case is O(log(n))
+	 * hasNext() : 	Worst case is O(1)
 	 * @return an Iterator over the keys in the priority queue in ascending order
 	 */
 	public Iterator<Key> iterator() {

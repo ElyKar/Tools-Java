@@ -23,6 +23,9 @@ import java.util.NoSuchElementException;
  *  The insert and decrease-key take time proportional to log-d(n)
  *  The is-empty, min-index, min-key, size, contains and key-of operations take constant time.
  *  Construction takes time proportional to the specified capacity.
+ *  
+ *  The arrays used in this structure have the first d indices empty,
+ *  it apparently helps with caching effects.
  *
  *  @author Tristan Claverie
  */
@@ -39,7 +42,7 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 	
 	/**
      * Initializes an empty indexed priority queue with indices between 0 and N-1
-     * Runs in O(n)
+     * Worst case is O(n)
      * @param N number of keys in the priority queue, index from 0 to N-1
      * @param D dimension of the heap
      * @throws java.lang.IllegalArgumentException if N < 0
@@ -59,14 +62,14 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 	
 	/**
      * Initializes an empty indexed priority queue with indices between 0 and N-1
-     * Runs in O(n)
+     * Worst case is O(n)
      * @param N number of keys in the priority queue, index from 0 to N-1
      * @param D dimension of the heap
      * @param C a Comparator over the keys
      * @throws java.lang.IllegalArgumentException if N < 0
      * @throws java.lang.IllegalArgumentException if D < 2
      */
-	public IndexMultiwayMinPQ(Comparator<Key> C, int N, int D) {
+	public IndexMultiwayMinPQ(int N, Comparator<Key> C, int D) {
 		if (N < 0) throw new IllegalArgumentException("Maximum number of elements cannot be negative");
 		if (D < 2) throw new IllegalArgumentException("Dimension should be 2 or over");
 		this.d = D;
@@ -80,7 +83,7 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Whether the priority queue is empty
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return true if the priority queue is empty, false if not
 	 */
 	public boolean isEmpty() {
@@ -89,7 +92,7 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Does the priority queue contains the index i ?
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @return true if i is on the priority queue, false if not
@@ -101,7 +104,7 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Number of elements currently on the priority queue
-	 * Runs in O(1)
+	 * Worst case is O(1)
 	 * @return the number of elements on the priority queue
 	 */
 	public int size() {
@@ -110,7 +113,7 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Associates a key with an index
-	 * Runs in O(log-d(n))
+	 * Worst case is O(log-d(n))
 	 * @param i an index
 	 * @param key a Key associated with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -126,8 +129,8 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 	}
 
 	/**
-	 * Get the index associated with the minimum key
-	 * Runs in O(1)
+	 * Gets the index associated with the minimum key
+	 * Worst case is O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
@@ -137,8 +140,8 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 	}
 
 	/**
-	 * Get the minimum key currently in the queue
-	 * Runs in O(1)
+	 * Gets the minimum key currently in the queue
+	 * Worst case is O(1)
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the minimum key currently in the priority queue
 	 */
@@ -149,7 +152,7 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Deletes the minimum key
-	 * Runs in O(d*log-d(n))
+	 * Worst case is O(d*log-d(n))
 	 * @throws java.util.NoSuchElementException if the priority queue is empty
 	 * @return the index associated with the minimum key
 	 */
@@ -165,8 +168,8 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 	}
 
 	/**
-	 * Get the key associated with index i
-	 * Runs in O(1)
+	 * Gets the key associated with index i
+	 * Worst case is O(1)
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.IllegalArgumentException if the index is not in the queue
@@ -180,8 +183,8 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Changes the key associated with index i to the given key
-	 * If the given key is greater, runs in O(d*log-d(n))
-	 * If the given key is lower,   runs in O(log-d(n))
+	 * If the given key is greater, Worst case is O(d*log-d(n))
+	 * If the given key is lower,   Worst case is O(log-d(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -198,7 +201,7 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Decreases the key associated with index i to the given key
-	 * Runs in O(log-d(n))
+	 * Worst case is O(log-d(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -215,7 +218,7 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 
 	/**
 	 * Increases the key associated with index i to the given key
-	 * Runs in O(d*log-d(n))
+	 * Worst case is O(d*log-d(n))
 	 * @param i an index
 	 * @param key the key to associate with i
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
@@ -231,8 +234,8 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 	}
 
 	/**
-	 * Deletes the key associated the given index
-	 * Runs in O(d*log-d(n))
+	 * Deletes the key associated to the given index
+	 * Worst case is O(d*log-d(n))
 	 * @param i an index
 	 * @throws java.lang.IndexOutOfBoundsException if the specified index is invalid
 	 * @throws java.util.NoSuchElementException if the given index has no key associated with
@@ -309,11 +312,11 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 	 **************************/
 	
 	/**
-	 * Get an Iterator over the indexes in the priority queue in ascending order
+	 * Gets an Iterator over the indexes in the priority queue in ascending order
 	 * The Iterator does not implement the remove() method
-	 * iterator() : Runs in O(n)
-	 * next() : Runs in O(d*log-d(n))
-	 * hasNext() : Runs in O(1)
+	 * iterator() : Worst case is O(n)
+	 * next() : 	Worst case is O(d*log-d(n))
+	 * hasNext() : 	Worst case is O(1)
 	 * @return an Iterator over the indexes in the priority queue in ascending order
 	 */
 	
@@ -321,12 +324,12 @@ public class IndexMultiwayMinPQ<Key> implements Iterable<Integer> {
 		return new MyIterator();
 	}
 	
-	//Constructor an Iterator over the indices in linear time
+	//Constructs an Iterator over the indices in linear time
 	private class MyIterator implements Iterator<Integer> {
 		IndexMultiwayMinPQ<Key> clone;
 		
 		public MyIterator() {
-			clone = new IndexMultiwayMinPQ<Key>(comp, nmax, d);
+			clone = new IndexMultiwayMinPQ<Key>(nmax, comp, d);
 			for (int i = 0; i < n; i++) {
 				clone.insert(pq[i+d], keys[pq[i+d]+d]);
 			}
